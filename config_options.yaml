@@ -109,6 +109,13 @@ config:
       shortname: lograte_in_min
       type: int
       calcmode: increment_in_minute
+      # calcmode: passthroug           # Do not change the measured data, this is the default
+      # calcmode: div_by_1024          # Divide the measured value by 1024
+      # calcmode: div_by_1024_1024     # Divide the measured value by 1024*1024
+      # calcmode: increment            # The difference between the measured and the last measured value
+      # calcmode: increment_in_sec     # The difference between the measured and the last measured value calculated for a second
+      # calcmode: increment_in_minute  # The difference between the measured and the last measured value calculated for a minute
+
       agent:
           agentname: CallSystemCommand
           command: "cat /var/log/daemon.log|wc -l"
