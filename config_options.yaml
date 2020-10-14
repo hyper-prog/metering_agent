@@ -1,0 +1,138 @@
+#
+# Sample config for metering_agent.py
+#
+#
+
+config:
+    collector:
+        runmode: loop  # (Reads data,write out, waits) in endless loop until interrupted
+        # runmode: once # Reads data, write out and exit
+        # runmode: twice # Reads all data, wait, read again, write out than exit
+
+        interval: 300  #Default wait interval in second
+
+        cond_intervals: #Conditional intervals
+            - name: Workhours
+              from_h: 8   #Start from this hour
+              until_h: 17 #Until this hour
+              priority: 1
+              interval: 120
+
+            - name: Weekend_Saturday
+              dayofweek: sat
+              priority: 2
+              interval: 600
+
+            - name: Weekend_Sunday
+              dayofweek: sun
+              priority: 2
+              interval: 600
+
+    # The outputs which publish/write after evry read cycle
+    outputs:
+
+    - type: NiceTable
+    # This generates a nice textual output for human read
+    # Without any other modifier it writes to standard output
+
+    - type: Json
+      outputfile: json.txt
+
+    - type: SqlDatabase
+      database_ref: metering_database  #This name have to match to a database entry below
+      tablename: myserverdata
+      timestampname: recordtime
+
+    # The inputs readed in evry read cycle
+    inputs:
+    - description: Get the outbound bandwidth from my pc
+      name: eth0_outbound_bandwidth
+      shortname: tx_eth0
+      type: float
+      agent:
+          agentname: BandwidthBySys
+          interface: eth0
+          direction: tx
+
+    - description: Get the inbound bandwidth from my pc
+      name: eth0_inbound_bandwidth
+      shortname: rx_eth0
+      type: float
+      agent:
+          agentname: BandwidthBySys
+          interface: eth0
+          direction: rx
+
+    - description: Get a value from sql database
+      name: application_stored_item_count
+      shortname: appitemcnt
+      type: int
+      agent:
+          agentname: SqlDerivedData
+          database_ref: myapp_database
+          sql: "select count(*) from items"
+
+    - description:
+      name: myserver_loadfirst
+      shortname: load_first
+      type: str
+      agent:
+          agentname: SystemLoadByProc
+          index: 0
+
+    - description:
+      name: myserver_loadthree
+      shortname: load_three
+      type: str
+      agent:
+          agentname: SystemLoadByProc
+          index: 2
+
+    - description:
+      name: mylinux_freemem
+      shortname: freemem
+      type: float
+      agent:
+          agentname: SystemMemoryByProc
+          reqdata: MemFree
+
+    - description:
+      name: mylinux_totalmem
+      shortname: totalmem
+      type: float
+      agent:
+          agentname: SystemMemoryByProc
+          reqdata: MemTotal
+
+    - description:
+      name: myserver_lograte_in_minute
+      shortname: lograte_in_min
+      type: int
+      calcmode: increment_in_minute
+      agent:
+          agentname: CallSystemCommand
+          command: "cat /var/log/daemon.log|wc -l"
+
+    - description:
+      name: myserver_krnl_maxthread
+      shortname: krnl_maxthr
+      type: int
+      agent:
+          agentname: ReadFileData
+          file: "/proc/sys/kernel/threads-max"
+
+    databases:
+
+    - refname: myapp_database
+      type: Mysql
+      name: myappdb
+      host: 192.168.1.110
+      user: dbuser
+      password: "PasswordForApplicationDbSecret"
+
+    - refname: metering_database
+      type: Pgsql
+      name: meterdb
+      host: 192.168.1.100
+      user: sqlusr_meterdb
+      password: "PasswordForMeteringDbSecret"

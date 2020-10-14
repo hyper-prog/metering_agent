@@ -1,0 +1,54 @@
+config:
+    collector:
+        runmode: loop
+        interval: 60
+    outputs:
+    - type: NiceTable
+
+    - type: SqlDatabase
+      database_ref: metering_database
+      tablename: myserverdata
+      timestampname: recordtime
+
+    inputs:
+    - description: Get the outbound bandwidth from my pc
+      name: eth0_outbound_bandwidth
+      shortname: tx_eth0
+      type: float
+      agent:
+          agentname: BandwidthBySys
+          interface: eth0
+          direction: tx
+
+    - description: Get the inbound bandwidth from my pc
+      name: eth0_inbound_bandwidth
+      shortname: rx_eth0
+      type: float
+      agent:
+          agentname: BandwidthBySys
+          interface: eth0
+          direction: rx
+
+    - description:
+      name: myserver_loadfirst
+      shortname: load_first
+      type: str
+      agent:
+          agentname: SystemLoadByProc
+          index: 0
+
+    - description:
+      name: mylinux_freemem
+      shortname: freemem
+      type: float
+      agent:
+          agentname: SystemMemoryByProc
+          reqdata: MemFree
+
+    databases:
+    - refname: metering_database
+      type: Pgsql
+      name: meterdb
+      host: 192.168.1.100
+      user: sqlusr_meterdb
+      password: "PasswordForMeteringDbSecret"
