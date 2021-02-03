@@ -11,7 +11,7 @@ config:
       timestampname: recordtime
 
     inputs:
-    - description: Get the outbound bandwidth from my pc
+    - description: Get the outbound bandwidth from eth0
       name: eth0_outbound_bandwidth
       shortname: tx_eth0
       type: float
@@ -20,12 +20,30 @@ config:
           interface: eth0
           direction: tx
 
-    - description: Get the inbound bandwidth from my pc
+    - description: Get the inbound bandwidth from eth0
       name: eth0_inbound_bandwidth
       shortname: rx_eth0
       type: float
       agent:
           agentname: BandwidthBySys
+          interface: eth0
+          direction: rx
+
+    - description: Get the outbound packet rate from eth0
+      name: eth0_outbound_packetrate
+      shortname: tx_eth0
+      type: float
+      agent:
+          agentname: NetworkPacketsBySys
+          interface: eth0
+          direction: tx
+
+    - description: Get the inbound packet rate from eth0
+      name: eth0_inbound_packetrate
+      shortname: rx_eth0
+      type: float
+      agent:
+          agentname: NetworkPacketsBySys
           interface: eth0
           direction: rx
 

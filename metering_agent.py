@@ -202,6 +202,24 @@ class Collector_BandwidthBySys(CollectorBase_ReadFileBased):
             return "NA";
         return "{0:.2f} kB/s".format(self.result)
 
+class Collector_NetworkPacketsBySys(CollectorBase_ReadFileBased):
+    def __init__(self,name,shortname,datatype,mtype,par = {}):
+        if (par["direction"] != "tx" and par["direction"] != "rx"):
+            raise ValueError("BandwidthBySys datasource: direction error")
+        par["filename"] = "/sys/class/net/" + par["interface"] + \
+                          "/statistics/" + par["direction"] + "_packets"
+        mtype = "increment_in_sec"
+        super().__init__(name,shortname,datatype,mtype,par)
+
+    def read_low(self,sec):
+        self._measured = float(self.read_file())
+        return self._measured
+
+    def niceresult(self):
+        if self.result == None:
+            return "NA";
+        return "{} packets/s".format(self.result)
+
 class Collector_SystemLoadByProc(CollectorBase_ReadFileBased):
     def __init__(self,name,shortname,datatype,mtype,par = {}):
         par["filename"] = "/proc/loadavg"
